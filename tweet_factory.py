@@ -313,15 +313,8 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     fn_views = lf(False, sz["views"])
     fn_emoji = load_emoji_font(sz["emoji"])
 
-    # ── TOP HEADER: @equialpha centered ──
+    # ── TOP: empty space ──
     ly = 40
-    top_t = "@equialpha"
-    top_tw = draw.textlength(top_t, font=fn_top)
-    draw.text(((W - top_tw) / 2, ly + 10), top_t, fill='#e6edf3', font=fn_top)
-
-    sub_t = "Swing DNA"
-    sub_tw = draw.textlength(sub_t, font=fn_top_sub)
-    draw.text(((W - sub_tw) / 2, ly + sz['top'] + 14), sub_t, fill='#e6edf3', font=fn_top_sub)
 
     # ── TWEET CARD ──
     cy_start = ly + sz['top'] + sz['sub'] + 45
@@ -438,6 +431,16 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     by = content_end + (available - 200) // 2
     by = max(by, content_end + 30)
     by = min(by, H - 230)
+
+    # Follow line above branding
+    follow_t = "Follow @equialpha"
+    follow_tw = draw.textlength(follow_t, font=fn_bt)
+    x_logo_t = " 𝕏"
+    x_tw = draw.textlength(x_logo_t, font=fn_bt)
+    total_fw = follow_tw + x_tw
+    fx = (W - total_fw) / 2
+    draw.text((fx, by - sz['bt'] - 15), follow_t, fill='#e6edf3', font=fn_bt)
+    draw.text((fx + follow_tw, by - sz['bt'] - 15), x_logo_t, fill='#1d9bf0', font=fn_bt)
 
     draw.line([(200, by), (W - 200, by)], fill='#1d9bf0', width=1)
 
