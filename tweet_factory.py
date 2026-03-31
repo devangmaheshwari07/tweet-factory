@@ -208,7 +208,7 @@ def get_all_tweets_from_calendar(cal):
 
 
 # --- Tweet Card Generator ---
-def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
+def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", text_size="Large"):
     W, H = 1080, 1920
     img = PILImage.new('RGB', (W, H), '#0d1117')
     draw = ImageDraw.Draw(img)
@@ -288,43 +288,51 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
                 draw.text((x, y), part, fill=fill, font=font)
                 x += font.getlength(part)
 
-    fn_emoji = load_emoji_font(36)
-    fn_top = lf(True, 50)
-    fn_top_sub = lf(False, 26)
-    fn_display = lf(True, 34)
-    fn_at = lf(False, 26)
-    fn_tweet = lf(False, 36)
-    fn_time = lf(False, 24)
-    fn_engage = lf(False, 24)
-    fn_hashtag = lf(True, 28)
-    fn_bt = lf(True, 40)
-    fn_bs = lf(False, 26)
-    fn_bd = lf(False, 24)
-    fn_xl = lf(True, 54)
-    fn_verified = lf(True, 16)
-    fn_views = lf(False, 22)
+    fn_emoji = load_emoji_font(sz["emoji"])
+    # Size presets: Large (phone-friendly), Medium, Small (more text)
+    sizes = {
+        "Large":  {"top":56,"sub":30,"display":38,"at":28,"tweet":40,"time":26,"engage":26,"hash":32,"bt":44,"bs":28,"bd":26,"xl":58,"ver":18,"views":24,"emoji":40,"wrap":38,"line_h":52,"para_gap":28},
+        "Medium": {"top":50,"sub":26,"display":34,"at":24,"tweet":34,"time":22,"engage":22,"hash":28,"bt":40,"bs":24,"bd":22,"xl":52,"ver":16,"views":20,"emoji":34,"wrap":42,"line_h":44,"para_gap":22},
+        "Small":  {"top":44,"sub":22,"display":30,"at":22,"tweet":28,"time":20,"engage":20,"hash":24,"bt":36,"bs":22,"bd":20,"xl":48,"ver":14,"views":18,"emoji":28,"wrap":48,"line_h":38,"para_gap":18},
+    }
+    sz = sizes.get(text_size, sizes["Large"])
+
+    fn_top = lf(True, sz["top"])
+    fn_top_sub = lf(False, sz["sub"])
+    fn_display = lf(True, sz["display"])
+    fn_at = lf(False, sz["at"])
+    fn_tweet = lf(False, sz["tweet"])
+    fn_time = lf(False, sz["time"])
+    fn_engage = lf(False, sz["engage"])
+    fn_hashtag = lf(True, sz["hash"])
+    fn_bt = lf(True, sz["bt"])
+    fn_bs = lf(False, sz["bs"])
+    fn_bd = lf(False, sz["bd"])
+    fn_xl = lf(True, sz["xl"])
+    fn_verified = lf(True, sz["ver"])
+    fn_views = lf(False, sz["views"])
 
     # ── TOP HEADER: @equialpha centered ──
-    ly = 45
+    ly = 40
     top_t = "@equialpha"
     top_tw = draw.textlength(top_t, font=fn_top)
     draw.text(((W - top_tw) / 2, ly + 10), top_t, fill='#e6edf3', font=fn_top)
 
     sub_t = "Swing DNA"
     sub_tw = draw.textlength(sub_t, font=fn_top_sub)
-    draw.text(((W - sub_tw) / 2, ly + 58), sub_t, fill='#e6edf3', font=fn_top_sub)
+    draw.text(((W - sub_tw) / 2, ly + 62), sub_t, fill='#e6edf3', font=fn_top_sub)
 
     # ── TWEET CARD ──
-    cx, cy, cw = 35, 185, W - 70
+    cx, cy, cw = 35, 200, W - 70
 
     lines = []
     for para in tweet_text.split('\n'):
         if para.strip() == '': lines.append('')
-        else: lines.extend(tw.wrap(para, width=42))
+        else: lines.extend(tw.wrap(para, width=sz["wrap"]))
 
-    text_h = sum(20 if l == '' else 44 for l in lines)
+    text_h = sum(sz["para_gap"] if l == '' else sz["line_h"] for l in lines)
     ch = max(500, 100 + text_h + 50 + 45 + 55 + 60 + 40)
-    ch = min(ch, 1250)
+    ch = min(ch, 1350)
 
     draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=24, fill='#161b22', outline='#30363d', width=2)
     draw.rounded_rectangle([cx + 2, cy + 2, cx + cw - 2, cy + 5], radius=0, fill='#1d9bf0')
@@ -349,22 +357,22 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     name_x = pfp_x + pfp_size + 14
     draw.text((name_x, pfp_y), "CA Devang Maheshwari", fill='#e6edf3', font=fn_display)
     vx = name_x + draw.textlength("CA Devang Maheshwari", font=fn_display) + 6
-    draw.ellipse([vx, pfp_y + 5, vx + 22, pfp_y + 27], fill='#1d9bf0')
+    draw.ellipse([vx, pfp_y + 6, vx + 24, pfp_y + 30], fill='#1d9bf0')
     draw.text((vx + 3, pfp_y + 4), "\u2713", fill='#ffffff', font=fn_verified)
-    draw.text((name_x, pfp_y + 33), "@equialpha", fill='#8b949e', font=fn_at)
+    draw.text((name_x, pfp_y + 38), "@equialpha", fill='#8b949e', font=fn_at)
 
     draw.text((cx + cw - 60, cy + 22), "\U0001d54f", fill='#ffffff', font=fn_xl)
 
-    sep_y = pfp_y + pfp_size + 18
+    sep_y = pfp_y + pfp_size + 22
     draw.line([(cx + 20, sep_y), (cx + cw - 20, sep_y)], fill='#3d444d', width=1)
 
     # Tweet text
-    yt = sep_y + 18
+    yt = sep_y + 22
     for line in lines:
         if yt > cy + ch - 140: break
-        if line == '': yt += 20; continue
+        if line == '': yt += sz['para_gap']; continue
         draw_text_with_emoji(draw, (cx + 24, yt), line, fill='#e6edf3', font=fn_tweet, emoji_font=fn_emoji)
-        yt += 44
+        yt += sz["line_h"]
 
     # Timestamp
     yt += 18
@@ -376,7 +384,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     draw.text((cx + cw - 32 - vw, yt + 1), views_text, fill='#8b949e', font=fn_views)
 
     # Engagement
-    yt += 38
+    yt += 44
     draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
     yt += 14
     # Draw engagement icons as simple shapes + text
@@ -757,8 +765,9 @@ with tab_calendar:
                                 st.session_state.calendar = load_calendar()
                                 st.rerun()
                     with b3:
+                        cal_text_size = st.selectbox("Size", ["Large", "Medium", "Small"], index=0, key=f"cardsize_{date_str}_{ei}", label_visibility="collapsed")
                         if st.button("📸 Card", key=f"card_{date_str}_{ei}"):
-                            card_buf = generate_tweet_card(entry["tweet"], entry["category"], date_str)
+                            card_buf = generate_tweet_card(entry["tweet"], entry["category"], date_str, text_size=cal_text_size)
                             st.session_state[f"card_img_{date_str}_{ei}"] = card_buf
                     with b4:
                         dup_date = st.date_input("Dup to", value=datetime.date.today(), key=f"dupdate_{date_str}_{ei}", label_visibility="collapsed")
@@ -803,9 +812,11 @@ with tab_card:
 
         card_date = st.date_input("Date on card", value=datetime.date.today(), key="card_maker_date")
 
+        card_text_size = st.radio("Text Size", ["Large", "Medium", "Small"], index=0, horizontal=True, key="card_text_size")
+
         if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
             if card_tweet_input:
-                card_buf = generate_tweet_card(card_tweet_input, "", str(card_date))
+                card_buf = generate_tweet_card(card_tweet_input, "", str(card_date), text_size=card_text_size)
                 st.session_state["card_maker_result"] = card_buf
             else:
                 st.warning("Paste a tweet first!")
