@@ -208,7 +208,7 @@ def get_all_tweets_from_calendar(cal):
 
 
 # --- Tweet Card Generator ---
-def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.jpg"):
+def generate_tweet_card(tweet_text, category, date_str, logo_path="logo 2.png"):
     W, H = 1080, 1920
     img = PILImage.new('RGB', (W, H), '#0d1117')
     draw = ImageDraw.Draw(img)
