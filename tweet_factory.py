@@ -219,22 +219,55 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
         b = int(23 + (y / H) * 20)
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
-    def lf(bold, size):
-        paths_b = [
+    # Font loading with download fallback
+    import urllib.request, tempfile
+    _font_cache = {}
+    def get_font_path(bold=False):
+        key = "bold" if bold else "regular"
+        if key in _font_cache:
+            return _font_cache[key]
+        # Try system fonts first
+        candidates_bold = [
             "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
             "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
             "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+            "/usr/share/fonts/truetype/ubuntu/Ubuntu-Bold.ttf",
+            "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
         ]
-        paths_r = [
+        candidates_regular = [
             "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
             "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+            "/usr/share/fonts/truetype/ubuntu/Ubuntu-Regular.ttf",
+            "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
         ]
-        for p in (paths_b if bold else paths_r):
+        candidates = candidates_bold if bold else candidates_regular
+        for p in candidates:
+            if os.path.exists(p):
+                _font_cache[key] = p
+                return p
+        # Download DejaVu as fallback
+        url_bold = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans-Bold.ttf"
+        url_reg = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
+        url = url_bold if bold else url_reg
+        fname = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
+        local_path = os.path.join(tempfile.gettempdir(), fname)
+        if not os.path.exists(local_path):
             try:
-                return ImageFont.truetype(p, size)
+                urllib.request.urlretrieve(url, local_path)
             except:
-                continue
+                _font_cache[key] = None
+                return None
+        _font_cache[key] = local_path
+        return local_path
+
+    def lf(bold, size):
+        path = get_font_path(bold)
+        if path:
+            try:
+                return ImageFont.truetype(path, size)
+            except:
+                pass
         return ImageFont.load_default()
 
     fn = lf(True, 38)
@@ -248,6 +281,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     fbs = lf(False, 22)
     fbd = lf(False, 18)
 
+    # ── LOGO ──
     ls = 120
     lx, ly = 60, 50
     if os.path.exists(logo_path):
@@ -268,6 +302,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
         except:
             pass
 
+    # Name + Handle centered
     nt = "CA Devang Maheshwari"
     nw = draw.textlength(nt, font=fn)
     draw.text(((W - nw) / 2, ly + 15), nt, fill='#e6edf3', font=fn)
@@ -279,6 +314,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     draw.text((hx, ly + 65), h1, fill='#8b949e', font=fhl)
     draw.text((hx + h1w, ly + 63), h2, fill='#1d9bf0', font=fh)
 
+    # ── TWEET CARD ──
     cx, cy, cw = 55, 230, W - 110
 
     lines = []
@@ -295,7 +331,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=24, fill='#161b22', outline='#30363d', width=2)
     draw.rounded_rectangle([cx, cy, cx + cw, cy + 6], radius=0, fill='#1d9bf0')
 
-    draw.text((cx + 35, cy + 25), "𝕏", fill='#1d9bf0', font=fch)
+    draw.text((cx + 35, cy + 25), "\U0001d54f", fill='#1d9bf0', font=fch)
     draw.text((cx + 70, cy + 27), "@equialpha", fill='#8b949e', font=fch)
     draw.text((cx + cw - 200, cy + 30), date_str, fill='#484f58', font=fd)
     draw.line([(cx + 35, cy + 70), (cx + cw - 35, cy + 70)], fill='#21262d', width=1)
@@ -310,16 +346,18 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
         draw.text((cx + 40, yt), line, fill='#e6edf3', font=ft)
         yt += 40
 
+    # ── HASHTAGS ──
     hashtag_t = "#SwingTrading  #SwingDNA  #PriceAction"
     htw2 = draw.textlength(hashtag_t, font=fht)
     draw.text(((W - htw2) / 2, cy + ch + 25), hashtag_t, fill='#1d9bf0', font=fht)
 
-    # Position branding: centered between hashtags end and image bottom
+    # ── BOTTOM BRANDING ──
     content_end = cy + ch + 65
     available = H - content_end
     by = content_end + (available - 200) // 2
     by = max(by, content_end + 40)
     by = min(by, H - 220)
+
     draw.line([(150, by), (W - 150, by)], fill='#1d9bf0', width=1)
 
     for txt, yo, clr, f in [
