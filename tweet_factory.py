@@ -321,10 +321,11 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     sub_t = "Swing DNA"
     sub_tw = draw.textlength(sub_t, font=fn_top_sub)
-    draw.text(((W - sub_tw) / 2, ly + 62), sub_t, fill='#e6edf3', font=fn_top_sub)
+    draw.text(((W - sub_tw) / 2, ly + sz['top'] + 14), sub_t, fill='#e6edf3', font=fn_top_sub)
 
     # ── TWEET CARD ──
-    cx, cy, cw = 35, 200, W - 70
+    cy_start = ly + sz['top'] + sz['sub'] + 45
+    cx, cy, cw = 35, cy_start, W - 70
 
     lines = []
     for para in tweet_text.split('\n'):
@@ -358,13 +359,13 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     name_x = pfp_x + pfp_size + 14
     draw.text((name_x, pfp_y), "CA Devang Maheshwari", fill='#e6edf3', font=fn_display)
     vx = name_x + draw.textlength("CA Devang Maheshwari", font=fn_display) + 6
-    draw.ellipse([vx, pfp_y + 6, vx + 24, pfp_y + 30], fill='#1d9bf0')
-    draw.text((vx + 3, pfp_y + 4), "\u2713", fill='#ffffff', font=fn_verified)
-    draw.text((name_x, pfp_y + 38), "@equialpha", fill='#8b949e', font=fn_at)
+    draw.ellipse([vx, pfp_y + 4, vx + sz['ver'] + 6, pfp_y + sz['ver'] + 10], fill='#1d9bf0')
+    draw.text((vx + 3, pfp_y + 3), "\u2713", fill='#ffffff', font=fn_verified)
+    draw.text((name_x, pfp_y + sz['display'] + 6), "@equialpha", fill='#8b949e', font=fn_at)
 
     draw.text((cx + cw - 60, cy + 22), "\U0001d54f", fill='#ffffff', font=fn_xl)
 
-    sep_y = pfp_y + pfp_size + 22
+    sep_y = pfp_y + max(pfp_size, sz['display'] + sz['at'] + 16) + 10
     draw.line([(cx + 20, sep_y), (cx + cw - 20, sep_y)], fill='#3d444d', width=1)
 
     # Tweet text
@@ -448,7 +449,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
         tw2 = draw.textlength(txt, font=f)
         draw.text(((W - tw2) / 2, by + yo), txt, fill=clr, font=f)
 
-    draw.line([(W // 2 - 50, by + 148), (W // 2 + 50, by + 148)], fill='#1d9bf0', width=2)
+    draw.line([(W // 2 - 50, b_y + 10), (W // 2 + 50, b_y + 10)], fill='#1d9bf0', width=2)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=False)
