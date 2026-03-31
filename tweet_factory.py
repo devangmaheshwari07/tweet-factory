@@ -213,8 +213,11 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     img = PILImage.new('RGB', (W, H), '#0d1117')
     draw = ImageDraw.Draw(img)
 
-    # Solid dark blue background
-    draw.rectangle([0, 0, W, H], fill=(28, 27, 43))
+    for y in range(H):
+        r = int(13 + (y / H) * 15)
+        g = int(17 + (y / H) * 10)
+        b = int(23 + (y / H) * 20)
+        draw.line([(0, y), (W, y)], fill=(r, g, b))
 
     def lf(bold, size):
         paths_b = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -226,7 +229,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
             except: continue
         return ImageFont.load_default()
 
-    fn_top = lf(True, 34)
+    fn_top = lf(True, 44)
     fn_top_sub = lf(False, 22)
     fn_display = lf(True, 30)
     fn_at = lf(False, 22)
@@ -247,9 +250,9 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     top_tw = draw.textlength(top_t, font=fn_top)
     draw.text(((W - top_tw) / 2, ly + 10), top_t, fill='#e6edf3', font=fn_top)
 
-    sub_t = "Swing DNA  \u00b7  Price Trends"
+    sub_t = "Swing DNA"
     sub_tw = draw.textlength(sub_t, font=fn_top_sub)
-    draw.text(((W - sub_tw) / 2, ly + 50), sub_t, fill='#8b949e', font=fn_top_sub)
+    draw.text(((W - sub_tw) / 2, ly + 58), sub_t, fill='#e6edf3', font=fn_top_sub)
 
     # ── TWEET CARD ──
     cx, cy, cw = 35, 185, W - 70
