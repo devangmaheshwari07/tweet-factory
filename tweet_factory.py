@@ -213,101 +213,124 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.jpg"):
     img = PILImage.new('RGB', (W, H), '#0d1117')
     draw = ImageDraw.Draw(img)
 
+    # Gradient background
     for y in range(H):
-        r = int(13 + (y/H) * 8)
-        g = int(17 + (y/H) * 6)
-        b = int(23 + (y/H) * 12)
+        r = int(13 + (y / H) * 15)
+        g = int(17 + (y / H) * 10)
+        b = int(23 + (y / H) * 20)
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
+    # Fonts
     try:
-        fn = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 34)
-        fhl = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
-        fh = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
-        ft = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
-        fht = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
-        fd = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
-        fch = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
-        fbt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 34)
-        fbs = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
-        fbd = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18)
+        font_name = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 38)
+        font_handle_label = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        font_handle = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
+        font_tweet = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 30)
+        font_hashtag = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
+        font_date = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
+        font_card_handle = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
+        font_bottom_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 36)
+        font_bottom_sub = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        font_bottom_detail = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18)
     except:
-        fn = fhl = fh = ft = fht = fd = fch = fbt = fbs = fbd = ImageFont.load_default()
+        font_name = font_handle_label = font_handle = font_tweet = font_hashtag = font_date = ImageFont.load_default()
+        font_card_handle = font_bottom_title = font_bottom_sub = font_bottom_detail = ImageFont.load_default()
 
-    # TOP: Logo left (round, not cropped) + Text center
+    # ── TOP HEADER: round logo left, centered name + handle ──
+    logo_size = 120
+    logo_x, logo_y = 60, 50
+
     if os.path.exists(logo_path):
         logo_raw = PILImage.open(logo_path).convert("RGB")
         ow, oh = logo_raw.size
         md = max(ow, oh)
-        sq = PILImage.new("RGB", (md, md), (255, 255, 255))
+        sq = PILImage.new("RGB", (md, md), (13, 17, 23))
         sq.paste(logo_raw, ((md - ow) // 2, (md - oh) // 2))
-        ls = 160
-        lr = sq.resize((ls, ls), PILImage.LANCZOS)
-        mask = PILImage.new("L", (ls, ls), 0)
-        ImageDraw.Draw(mask).ellipse([0, 0, ls - 1, ls - 1], fill=255)
-        lx, ly = 60, 35
-        draw.ellipse([lx - 5, ly - 5, lx + ls + 5, ly + ls + 5], fill='#ffffff', outline='#30363d', width=3)
-        la = PILImage.new("RGBA", (ls, ls), (0, 0, 0, 0))
+        lr = sq.resize((logo_size, logo_size), PILImage.LANCZOS)
+        mask = PILImage.new("L", (logo_size, logo_size), 0)
+        ImageDraw.Draw(mask).ellipse([0, 0, logo_size - 1, logo_size - 1], fill=255)
+        # White ring
+        draw.ellipse([logo_x - 4, logo_y - 4, logo_x + logo_size + 4, logo_y + logo_size + 4],
+                      outline='#ffffff', width=3)
+        la = PILImage.new("RGBA", (logo_size, logo_size), (0, 0, 0, 0))
         la.paste(lr, (0, 0))
         la.putalpha(mask)
-        img.paste(la, (lx, ly), la)
-        top_y = 35
-    else:
-        top_y = 50
+        img.paste(la, (logo_x, logo_y), la)
 
-    nt = "CA Devang Maheshwari"
-    nw = draw.textlength(nt, font=fn)
-    draw.text(((W - nw) // 2, top_y + 35), nt, fill='#e6edf3', font=fn)
-    hl_t = "X Handle - "
-    h_t = "@equialpha"
-    hlw = draw.textlength(hl_t, font=fhl)
-    htw = draw.textlength(h_t, font=fh)
-    hx = (W - hlw - htw) // 2
-    draw.text((hx, top_y + 85), hl_t, fill='#8b949e', font=fhl)
-    draw.text((hx + hlw, top_y + 83), h_t, fill='#1d9bf0', font=fh)
+    # Name centered
+    name_text = "CA Devang Maheshwari"
+    nw = draw.textlength(name_text, font=font_name)
+    draw.text(((W - nw) / 2, logo_y + 15), name_text, fill='#e6edf3', font=font_name)
 
-    # CARD
-    cx, cy = 60, 270
-    cw, ch = W - 120, 980
-    draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=30, fill='#161b22', outline='#30363d', width=2)
+    # Handle line centered
+    hl = "X Handle - "
+    ht = "@equialpha"
+    hlw = draw.textlength(hl, font=font_handle_label)
+    htw = draw.textlength(ht, font=font_handle)
+    hx = (W - hlw - htw) / 2
+    draw.text((hx, logo_y + 65), hl, fill='#8b949e', font=font_handle_label)
+    draw.text((hx + hlw, logo_y + 63), ht, fill='#1d9bf0', font=font_handle)
+
+    # ── TWEET CARD ──
+    cx, cy = 55, 230
+    cw = W - 110
+    ch = 1050
+
+    # Card background
+    draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=24, fill='#161b22', outline='#30363d', width=2)
+
+    # Blue accent line top
     draw.rounded_rectangle([cx, cy, cx + cw, cy + 6], radius=0, fill='#1d9bf0')
-    draw.text((cx + 40, cy + 30), "\U0001d54f", fill='#1d9bf0', font=fch)
-    draw.text((cx + 75, cy + 32), "@equialpha", fill='#8b949e', font=fch)
-    draw.text((cx + cw - 220, cy + 35), date_str, fill='#484f58', font=fd)
-    draw.line([(cx + 40, cy + 80), (cx + cw - 40, cy + 80)], fill='#21262d', width=1)
 
+    # Card header: X icon + @handle + date
+    draw.text((cx + 35, cy + 25), "𝕏", fill='#1d9bf0', font=font_card_handle)
+    draw.text((cx + 70, cy + 27), "@equialpha", fill='#8b949e', font=font_card_handle)
+    draw.text((cx + cw - 200, cy + 30), date_str, fill='#484f58', font=font_date)
+
+    # Separator
+    draw.line([(cx + 35, cy + 70), (cx + cw - 35, cy + 70)], fill='#21262d', width=1)
+
+    # Tweet text
     lines = []
     for para in tweet_text.split('\n'):
         if para.strip() == '':
             lines.append('')
         else:
-            lines.extend(tw.wrap(para, width=42))
+            lines.extend(tw.wrap(para, width=44))
 
-    yt = cy + 105
+    yt = cy + 95
     for line in lines:
         if line == '':
-            yt += 18
+            yt += 16
             continue
-        color = '#f85149' if '📉' in line else '#e6edf3'
-        draw.text((cx + 45, yt), line, fill=color, font=ft)
-        yt += 42
+        draw.text((cx + 40, yt), line, fill='#e6edf3', font=font_tweet)
+        yt += 40
 
-    # Hashtags
-    draw.text((cx + 45, cy + ch + 30), "#SwingTrading #SwingDNA #PriceAction", fill='#1d9bf0', font=fht)
+    # ── HASHTAGS below card ──
+    hashtag_text = "#SwingTrading  #SwingDNA  #PriceAction"
+    htw2 = draw.textlength(hashtag_text, font=font_hashtag)
+    draw.text(((W - htw2) / 2, cy + ch + 25), hashtag_text, fill='#1d9bf0', font=font_hashtag)
 
-    # BOTTOM (v3 style)
+    # ── BOTTOM BRANDING (v3 style) ──
     by = H - 280
-    for xp in range(150, W - 150):
-        draw.point((xp, by), fill=(29, 155, 240))
 
-    for text, yoff, fill, font in [
-        ("Swing DNA Course", 30, '#e6edf3', fbt),
-        ("Build the DNA for Catching Explosive Moves", 80, '#8b949e', fbs),
-        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 120, '#484f58', fbd),
-    ]:
-        tw2 = draw.textlength(text, font=font)
-        draw.text(((W - tw2) // 2, by + yoff), text, fill=fill, font=font)
+    # Thin blue line
+    draw.line([(150, by), (W - 150, by)], fill='#1d9bf0', width=1)
 
-    draw.line([(W//2 - 80, by + 165), (W//2 + 80, by + 165)], fill='#1d9bf0', width=2)
+    bt = "Swing DNA Course"
+    btw = draw.textlength(bt, font=font_bottom_title)
+    draw.text(((W - btw) / 2, by + 30), bt, fill='#e6edf3', font=font_bottom_title)
+
+    bs = "Build the DNA for Catching Explosive Moves"
+    bsw = draw.textlength(bs, font=font_bottom_sub)
+    draw.text(((W - bsw) / 2, by + 80), bs, fill='#8b949e', font=font_bottom_sub)
+
+    bd = "AI Powered Analysis  ·  Research Logs  ·  Charts  ·  Discipline"
+    bdw = draw.textlength(bd, font=font_bottom_detail)
+    draw.text(((W - bdw) / 2, by + 115), bd, fill='#484f58', font=font_bottom_detail)
+
+    # Small accent line
+    draw.line([(W // 2 - 60, by + 160), (W // 2 + 60, by + 160)], fill='#1d9bf0', width=2)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", quality=95)
