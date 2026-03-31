@@ -3,7 +3,10 @@ import datetime
 import re
 import json
 import os
+import io
 from collections import Counter
+from PIL import Image as PILImage, ImageDraw, ImageFont
+import textwrap as tw
 
 st.set_page_config(page_title="Tweet Factory 🐦", page_icon="🐦", layout="wide")
 
@@ -204,6 +207,114 @@ def get_all_tweets_from_calendar(cal):
     return all_tweets
 
 
+# --- Tweet Card Generator ---
+def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.jpg"):
+    W, H = 1080, 1920
+    img = PILImage.new('RGB', (W, H), '#0d1117')
+    draw = ImageDraw.Draw(img)
+
+    for y in range(H):
+        r = int(13 + (y/H) * 8)
+        g = int(17 + (y/H) * 6)
+        b = int(23 + (y/H) * 12)
+        draw.line([(0, y), (W, y)], fill=(r, g, b))
+
+    try:
+        fn = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 34)
+        fhl = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        fh = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 26)
+        ft = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 32)
+        fht = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 26)
+        fd = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        fch = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 28)
+        fbt = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 34)
+        fbs = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+        fbd = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 18)
+    except:
+        fn = fhl = fh = ft = fht = fd = fch = fbt = fbs = fbd = ImageFont.load_default()
+
+    # TOP: Logo left (round, not cropped) + Text center
+    if os.path.exists(logo_path):
+        logo_raw = PILImage.open(logo_path).convert("RGB")
+        ow, oh = logo_raw.size
+        md = max(ow, oh)
+        sq = PILImage.new("RGB", (md, md), (255, 255, 255))
+        sq.paste(logo_raw, ((md - ow) // 2, (md - oh) // 2))
+        ls = 160
+        lr = sq.resize((ls, ls), PILImage.LANCZOS)
+        mask = PILImage.new("L", (ls, ls), 0)
+        ImageDraw.Draw(mask).ellipse([0, 0, ls - 1, ls - 1], fill=255)
+        lx, ly = 60, 35
+        draw.ellipse([lx - 5, ly - 5, lx + ls + 5, ly + ls + 5], fill='#ffffff', outline='#30363d', width=3)
+        la = PILImage.new("RGBA", (ls, ls), (0, 0, 0, 0))
+        la.paste(lr, (0, 0))
+        la.putalpha(mask)
+        img.paste(la, (lx, ly), la)
+        top_y = 35
+    else:
+        top_y = 50
+
+    nt = "CA Devang Maheshwari"
+    nw = draw.textlength(nt, font=fn)
+    draw.text(((W - nw) // 2, top_y + 35), nt, fill='#e6edf3', font=fn)
+    hl_t = "X Handle - "
+    h_t = "@equialpha"
+    hlw = draw.textlength(hl_t, font=fhl)
+    htw = draw.textlength(h_t, font=fh)
+    hx = (W - hlw - htw) // 2
+    draw.text((hx, top_y + 85), hl_t, fill='#8b949e', font=fhl)
+    draw.text((hx + hlw, top_y + 83), h_t, fill='#1d9bf0', font=fh)
+
+    # CARD
+    cx, cy = 60, 270
+    cw, ch = W - 120, 980
+    draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=30, fill='#161b22', outline='#30363d', width=2)
+    draw.rounded_rectangle([cx, cy, cx + cw, cy + 6], radius=0, fill='#1d9bf0')
+    draw.text((cx + 40, cy + 30), "\U0001d54f", fill='#1d9bf0', font=fch)
+    draw.text((cx + 75, cy + 32), "@equialpha", fill='#8b949e', font=fch)
+    draw.text((cx + cw - 220, cy + 35), date_str, fill='#484f58', font=fd)
+    draw.line([(cx + 40, cy + 80), (cx + cw - 40, cy + 80)], fill='#21262d', width=1)
+
+    lines = []
+    for para in tweet_text.split('\n'):
+        if para.strip() == '':
+            lines.append('')
+        else:
+            lines.extend(tw.wrap(para, width=42))
+
+    yt = cy + 105
+    for line in lines:
+        if line == '':
+            yt += 18
+            continue
+        color = '#f85149' if '📉' in line else '#e6edf3'
+        draw.text((cx + 45, yt), line, fill=color, font=ft)
+        yt += 42
+
+    # Hashtags
+    draw.text((cx + 45, cy + ch + 30), "#SwingTrading #SwingDNA #PriceAction", fill='#1d9bf0', font=fht)
+
+    # BOTTOM (v3 style)
+    by = H - 280
+    for xp in range(150, W - 150):
+        draw.point((xp, by), fill=(29, 155, 240))
+
+    for text, yoff, fill, font in [
+        ("Swing DNA Course", 30, '#e6edf3', fbt),
+        ("Build the DNA for Catching Explosive Moves", 80, '#8b949e', fbs),
+        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 120, '#484f58', fbd),
+    ]:
+        tw2 = draw.textlength(text, font=font)
+        draw.text(((W - tw2) // 2, by + yoff), text, fill=fill, font=font)
+
+    draw.line([(W//2 - 80, by + 165), (W//2 + 80, by + 165)], fill='#1d9bf0', width=2)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", quality=95)
+    buf.seek(0)
+    return buf
+
+
 # --- Thread Builder ---
 def split_into_thread(text, max_chars=280):
     words = text.split()
@@ -239,7 +350,7 @@ def calculate_streak(cal):
 
 # ============ UI ============
 st.title("🐦 Tweet Factory")
-tab_generate, tab_calendar, tab_thread, tab_archive = st.tabs(["✍️ Generate", "📅 Content Calendar", "🧵 Thread Builder", "📝 All Tweets"])
+tab_generate, tab_calendar, tab_thread, tab_archive, tab_card = st.tabs(["✍️ Generate", "📅 Content Calendar", "🧵 Thread Builder", "📝 All Tweets", "📸 Card Maker"])
 
 # ============ TAB 1: GENERATE ============
 with tab_generate:
@@ -502,7 +613,7 @@ with tab_calendar:
                     st.markdown(f"**Tweet {ei+1}** — {short} [{status}]")
                     st.text_area("", entry["tweet"], height=100, key=f"cal_{date_str}_{ei}", disabled=True)
 
-                    b1, b2, b3, b4 = st.columns(4)
+                    b1, b2, b3, b4, b5 = st.columns(5)
                     with b1:
                         if st.button("📋 Copy", key=f"copy_{date_str}_{ei}"):
                             st.code(entry["tweet"])
@@ -514,22 +625,73 @@ with tab_calendar:
                                 st.session_state.calendar = load_calendar()
                                 st.rerun()
                     with b3:
+                        if st.button("📸 Card", key=f"card_{date_str}_{ei}"):
+                            card_buf = generate_tweet_card(entry["tweet"], entry["category"], date_str)
+                            st.session_state[f"card_img_{date_str}_{ei}"] = card_buf
+                    with b4:
                         dup_date = st.date_input("Dup to", value=datetime.date.today(), key=f"dupdate_{date_str}_{ei}", label_visibility="collapsed")
                         if st.button("📄 Duplicate", key=f"dup_{date_str}_{ei}"):
                             save_calendar_entry(str(dup_date), entry["tweet"], entry["category"])
                             st.session_state.calendar = load_calendar()
                             st.success(f"Duplicated to {dup_date}")
                             st.rerun()
-                    with b4:
+                    with b5:
                         if st.button("🗑️ Remove", key=f"caldel_{date_str}_{ei}"):
                             delete_calendar_entry(date_str, ei)
                             st.session_state.calendar = load_calendar()
                             st.rerun()
+
+                    if f"card_img_{date_str}_{ei}" in st.session_state:
+                        card_data = st.session_state[f"card_img_{date_str}_{ei}"]
+                        st.image(card_data, caption="Tweet Card Preview", width=400)
+                        st.download_button("⬇️ Download Card", card_data, f"tweet_card_{date_str}_{ei}.png", "image/png", key=f"dl_card_{date_str}_{ei}")
             else:
                 st.warning("No posts scheduled. Go to Generate tab to create one.")
 
 
-# ============ TAB 3: THREAD BUILDER ============
+# ============ TAB 3: CARD MAKER ============
+with tab_card:
+    st.subheader("📸 Tweet Card Maker")
+    st.caption("Paste any tweet → generate a premium share card for Instagram / Telegram.")
+
+    card_col1, card_col2 = st.columns([1, 1])
+
+    with card_col1:
+        card_tweet_input = st.text_area("Paste your tweet here", height=250, key="card_maker_input",
+                                         placeholder="Paste your tweet text here...")
+
+        if card_tweet_input:
+            cc = len(card_tweet_input)
+            if cc <= 280:
+                st.success(f"✅ {cc}/280 chars — single tweet")
+            elif cc <= 1400:
+                st.info(f"📝 {cc}/1400 chars — long tweet")
+            else:
+                st.warning(f"⚠️ {cc} chars — might not fit on card")
+
+        card_date = st.date_input("Date on card", value=datetime.date.today(), key="card_maker_date")
+
+        if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
+            if card_tweet_input:
+                card_buf = generate_tweet_card(card_tweet_input, "", str(card_date))
+                st.session_state["card_maker_result"] = card_buf
+            else:
+                st.warning("Paste a tweet first!")
+
+    with card_col2:
+        if "card_maker_result" in st.session_state:
+            card_data = st.session_state["card_maker_result"]
+            st.image(card_data, caption="Tweet Card Preview", use_container_width=True)
+            card_data.seek(0)
+            st.download_button("⬇️ Download Card PNG", card_data, f"tweet_card_{datetime.date.today()}.png", "image/png", key="card_maker_dl")
+        else:
+            st.markdown("")
+            st.markdown("")
+            st.markdown("")
+            st.info("👈 Paste a tweet and click Generate to see the card here.")
+
+
+# ============ TAB 4: THREAD BUILDER ============
 with tab_thread:
     st.subheader("🧵 Thread Builder")
     st.caption("Paste a long tweet and split it into a numbered thread.")
@@ -558,7 +720,7 @@ with tab_thread:
             st.success(f"✅ Saved {len(thread_parts)} tweets to {thread_date}!")
 
 
-# ============ TAB 4: ALL TWEETS (ARCHIVE) ============
+# ============ TAB 5: ALL TWEETS (ARCHIVE) ============
 with tab_archive:
     st.subheader("📝 All Tweets")
     st.caption("Every tweet saved to the calendar — your complete archive.")
