@@ -219,158 +219,138 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
         b = int(23 + (y / H) * 20)
         draw.line([(0, y), (W, y)], fill=(r, g, b))
 
-    # Font loading with download fallback
-    import urllib.request, tempfile
-    _font_cache = {}
-    def get_font_path(bold=False):
-        key = "bold" if bold else "regular"
-        if key in _font_cache:
-            return _font_cache[key]
-        # Try system fonts first
-        candidates_bold = [
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-            "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
-            "/usr/share/fonts/truetype/ubuntu/Ubuntu-Bold.ttf",
-            "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf",
-        ]
-        candidates_regular = [
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-            "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-            "/usr/share/fonts/truetype/ubuntu/Ubuntu-Regular.ttf",
-            "/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf",
-        ]
-        candidates = candidates_bold if bold else candidates_regular
-        for p in candidates:
-            if os.path.exists(p):
-                _font_cache[key] = p
-                return p
-        # Download DejaVu as fallback
-        url_bold = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans-Bold.ttf"
-        url_reg = "https://github.com/dejavu-fonts/dejavu-fonts/raw/master/ttf/DejaVuSans.ttf"
-        url = url_bold if bold else url_reg
-        fname = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
-        local_path = os.path.join(tempfile.gettempdir(), fname)
-        if not os.path.exists(local_path):
-            try:
-                urllib.request.urlretrieve(url, local_path)
-            except:
-                _font_cache[key] = None
-                return None
-        _font_cache[key] = local_path
-        return local_path
-
     def lf(bold, size):
-        path = get_font_path(bold)
-        if path:
-            try:
-                return ImageFont.truetype(path, size)
-            except:
-                pass
+        paths_b = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"]
+        paths_r = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"]
+        for p in (paths_b if bold else paths_r):
+            try: return ImageFont.truetype(p, size)
+            except: continue
         return ImageFont.load_default()
 
-    fn = lf(True, 42)
-    fhl = lf(False, 22)
-    fh = lf(True, 24)
-    ft = lf(False, 32)
-    fht = lf(True, 24)
-    fd = lf(False, 20)
-    fch = lf(True, 28)
-    fbt = lf(True, 36)
-    fbs = lf(False, 22)
-    fbd = lf(False, 18)
+    fn_top = lf(True, 34)
+    fn_top_sub = lf(False, 22)
+    fn_display = lf(True, 30)
+    fn_at = lf(False, 22)
+    fn_tweet = lf(False, 32)
+    fn_time = lf(False, 20)
+    fn_engage = lf(False, 20)
+    fn_hashtag = lf(True, 24)
+    fn_bt = lf(True, 36)
+    fn_bs = lf(False, 22)
+    fn_bd = lf(False, 20)
+    fn_xl = lf(True, 48)
+    fn_verified = lf(True, 14)
+    fn_views = lf(False, 18)
 
-    # ── LOGO ──
-    ls = 120
-    lx, ly = 60, 50
-    if os.path.exists(logo_path):
-        try:
-            raw = PILImage.open(logo_path).convert("RGB")
-            ow, oh = raw.size
-            md = max(ow, oh)
-            sq = PILImage.new("RGB", (md, md), (13, 17, 23))
-            sq.paste(raw, ((md - ow) // 2, (md - oh) // 2))
-            lr = sq.resize((ls, ls), PILImage.LANCZOS)
-            mask = PILImage.new("L", (ls, ls), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, ls - 1, ls - 1], fill=255)
-            draw.ellipse([lx - 4, ly - 4, lx + ls + 4, ly + ls + 4], outline='#ffffff', width=3)
-            la = PILImage.new("RGBA", (ls, ls), (0, 0, 0, 0))
-            la.paste(lr, (0, 0))
-            la.putalpha(mask)
-            img.paste(la, (lx, ly), la)
-        except:
-            pass
+    # ── TOP HEADER: @equialpha centered ──
+    ly = 45
+    top_t = "@equialpha"
+    top_tw = draw.textlength(top_t, font=fn_top)
+    draw.text(((W - top_tw) / 2, ly + 10), top_t, fill='#e6edf3', font=fn_top)
 
-    # Name + Handle centered
-    nt = "CA Devang Maheshwari"
-    nw = draw.textlength(nt, font=fn)
-    draw.text(((W - nw) / 2, ly + 15), nt, fill='#e6edf3', font=fn)
-
-    h1, h2 = "X Handle - ", "@equialpha"
-    h1w = draw.textlength(h1, font=fhl)
-    h2w = draw.textlength(h2, font=fh)
-    hx = (W - h1w - h2w) / 2
-    draw.text((hx, ly + 65), h1, fill='#8b949e', font=fhl)
-    draw.text((hx + h1w, ly + 63), h2, fill='#1d9bf0', font=fh)
+    sub_t = "Swing DNA  \u00b7  Price Trends"
+    sub_tw = draw.textlength(sub_t, font=fn_top_sub)
+    draw.text(((W - sub_tw) / 2, ly + 50), sub_t, fill='#8b949e', font=fn_top_sub)
 
     # ── TWEET CARD ──
-    cx, cy, cw = 55, 230, W - 110
+    cx, cy, cw = 55, 185, W - 110
 
     lines = []
     for para in tweet_text.split('\n'):
-        if para.strip() == '':
-            lines.append('')
-        else:
-            lines.extend(tw.wrap(para, width=44))
+        if para.strip() == '': lines.append('')
+        else: lines.extend(tw.wrap(para, width=40))
 
-    text_h = sum(16 if l == '' else 40 for l in lines)
-    ch = max(400, 95 + text_h + 60)
-    ch = min(ch, 1100)
+    text_h = sum(20 if l == '' else 44 for l in lines)
+    ch = max(500, 100 + text_h + 50 + 45 + 55 + 60 + 40)
+    ch = min(ch, 1250)
 
     draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=24, fill='#161b22', outline='#30363d', width=2)
-    draw.rounded_rectangle([cx, cy, cx + cw, cy + 6], radius=0, fill='#1d9bf0')
+    draw.rounded_rectangle([cx + 2, cy + 2, cx + cw - 2, cy + 5], radius=0, fill='#1d9bf0')
 
-    draw.text((cx + 35, cy + 25), "\U0001d54f", fill='#1d9bf0', font=fch)
-    draw.text((cx + 70, cy + 27), "@equialpha", fill='#8b949e', font=fch)
-    draw.text((cx + cw - 200, cy + 30), date_str, fill='#8b949e', font=fd)
-    draw.line([(cx + 35, cy + 70), (cx + cw - 35, cy + 70)], fill='#21262d', width=1)
+    # Profile pic inside card
+    pfp_size = 52
+    pfp_x, pfp_y = cx + 28, cy + 22
+    if os.path.exists(logo_path):
+        try:
+            raw2 = PILImage.open(logo_path).convert("RGB")
+            ow2, oh2 = raw2.size; md2 = max(ow2, oh2)
+            sq2 = PILImage.new("RGB", (md2, md2), (22, 27, 34))
+            sq2.paste(raw2, ((md2 - ow2) // 2, (md2 - oh2) // 2))
+            lr2 = sq2.resize((pfp_size, pfp_size), PILImage.LANCZOS)
+            mask2 = PILImage.new("L", (pfp_size, pfp_size), 0)
+            ImageDraw.Draw(mask2).ellipse([0, 0, pfp_size - 1, pfp_size - 1], fill=255)
+            la2 = PILImage.new("RGBA", (pfp_size, pfp_size), (0, 0, 0, 0))
+            la2.paste(lr2, (0, 0)); la2.putalpha(mask2)
+            img.paste(la2, (pfp_x, pfp_y), la2)
+        except: pass
 
-    yt = cy + 95
+    name_x = pfp_x + pfp_size + 14
+    draw.text((name_x, pfp_y), "CA Devang Maheshwari", fill='#e6edf3', font=fn_display)
+    vx = name_x + draw.textlength("CA Devang Maheshwari", font=fn_display) + 6
+    draw.ellipse([vx, pfp_y + 5, vx + 22, pfp_y + 27], fill='#1d9bf0')
+    draw.text((vx + 3, pfp_y + 4), "\u2713", fill='#ffffff', font=fn_verified)
+    draw.text((name_x, pfp_y + 33), "@equialpha", fill='#8b949e', font=fn_at)
+
+    draw.text((cx + cw - 60, cy + 22), "\U0001d54f", fill='#ffffff', font=fn_xl)
+
+    sep_y = pfp_y + pfp_size + 18
+    draw.line([(cx + 28, sep_y), (cx + cw - 28, sep_y)], fill='#21262d', width=1)
+
+    # Tweet text
+    yt = sep_y + 18
     for line in lines:
-        if yt > cy + ch - 30:
-            break
-        if line == '':
-            yt += 16
-            continue
-        draw.text((cx + 40, yt), line, fill='#e6edf3', font=ft)
-        yt += 40
+        if yt > cy + ch - 140: break
+        if line == '': yt += 20; continue
+        draw.text((cx + 32, yt), line, fill='#e6edf3', font=fn_tweet)
+        yt += 44
 
-    # ── HASHTAGS ──
+    # Timestamp
+    yt += 18
+    draw.line([(cx + 28, yt), (cx + cw - 28, yt)], fill='#21262d', width=1)
+    yt += 14
+    draw.text((cx + 32, yt), f"10:30 AM  \u00b7  {date_str}", fill='#8b949e', font=fn_time)
+    views_text = "2,847 Views"
+    vw = draw.textlength(views_text, font=fn_views)
+    draw.text((cx + cw - 32 - vw, yt + 1), views_text, fill='#8b949e', font=fn_views)
+
+    # Engagement
+    yt += 38
+    draw.line([(cx + 28, yt), (cx + cw - 28, yt)], fill='#21262d', width=1)
+    yt += 14
+    engage_items = [("\U0001f4ac", "12"), ("\U0001f501", "8"), ("\u2764\ufe0f", "96"), ("\U0001f516", ""), ("\u2b06\ufe0f", "")]
+    spacing = (cw - 60) // len(engage_items)
+    for i, (icon, count_txt) in enumerate(engage_items):
+        ix = cx + 32 + i * spacing
+        draw.text((ix, yt), icon, font=fn_engage)
+        if count_txt:
+            draw.text((ix + 26, yt + 2), count_txt, fill='#8b949e', font=fn_engage)
+
+    # Hashtags
+    ht_y = cy + ch + 28
     hashtag_t = "#SwingTrading  #SwingDNA  #PriceAction"
-    htw2 = draw.textlength(hashtag_t, font=fht)
-    draw.text(((W - htw2) / 2, cy + ch + 25), hashtag_t, fill='#1d9bf0', font=fht)
+    htw2 = draw.textlength(hashtag_t, font=fn_hashtag)
+    draw.text(((W - htw2) / 2, ht_y), hashtag_t, fill='#1d9bf0', font=fn_hashtag)
 
-    # ── BOTTOM BRANDING ──
-    content_end = cy + ch + 65
+    # Bottom branding
+    content_end = ht_y + 50
     available = H - content_end
     by = content_end + (available - 200) // 2
-    by = max(by, content_end + 40)
-    by = min(by, H - 220)
+    by = max(by, content_end + 30)
+    by = min(by, H - 230)
 
-    draw.line([(150, by), (W - 150, by)], fill='#1d9bf0', width=1)
+    draw.line([(200, by), (W - 200, by)], fill='#1d9bf0', width=1)
 
     for txt, yo, clr, f in [
-        ("Swing DNA Course", 30, '#e6edf3', fbt),
-        ("Build the DNA for Catching Explosive Moves", 80, '#b1bac4', fbs),
-        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 115, '#8b949e', fbd),
+        ("Swing DNA Course", 30, '#e6edf3', fn_bt),
+        ("Build the DNA for Catching Explosive Moves", 75, '#b1bac4', fn_bs),
+        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 108, '#8b949e', fn_bd),
     ]:
         tw2 = draw.textlength(txt, font=f)
         draw.text(((W - tw2) / 2, by + yo), txt, fill=clr, font=f)
 
-    draw.line([(W // 2 - 60, by + 160), (W // 2 + 60, by + 160)], fill='#1d9bf0', width=2)
-
-
+    draw.line([(W // 2 - 50, by + 148), (W // 2 + 50, by + 148)], fill='#1d9bf0', width=2)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=False)
