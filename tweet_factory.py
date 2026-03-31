@@ -819,19 +819,25 @@ with tab_card:
 
         card_date = st.date_input("Date on card", value=datetime.date.today(), key="card_maker_date")
 
-        # Suggest text size based on content length
+        # Auto-select text size based on content length
+        sug_idx_maker = 1
+        sug_name_maker = "Large"
         if card_tweet_input:
             tlen = len(card_tweet_input)
             if tlen <= 200:
-                suggested = "Extra Large"
+                sug_idx_maker = 0
+                sug_name_maker = "Extra Large"
             elif tlen <= 400:
-                suggested = "Large"
+                sug_idx_maker = 1
+                sug_name_maker = "Large"
             elif tlen <= 700:
-                suggested = "Medium"
+                sug_idx_maker = 2
+                sug_name_maker = "Medium"
             else:
-                suggested = "Small"
-            st.info(f"💡 Suggested size: **{suggested}** ({tlen} chars)")
-        card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=1, horizontal=True, key="card_text_size")
+                sug_idx_maker = 3
+                sug_name_maker = "Small"
+            st.caption(f"💡 Recommended: {sug_name_maker} ({tlen} chars)")
+        card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=sug_idx_maker, horizontal=True, key="card_text_size")
 
         if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
             if card_tweet_input:
