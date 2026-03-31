@@ -325,7 +325,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # ── TWEET CARD ──
     cy_start = ly + sz['top'] + sz['sub'] + 45
-    cx, cy, cw = 35, cy_start, W - 70
+    cx, cy, cw = 25, cy_start, W - 50
 
     lines = []
     for para in tweet_text.split('\n'):
@@ -341,7 +341,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # Profile pic inside card
     pfp_size = 52
-    pfp_x, pfp_y = cx + 20, cy + 22
+    pfp_x, pfp_y = cx + 12, cy + 22
     if os.path.exists(logo_path):
         try:
             raw2 = PILImage.open(logo_path).convert("RGB")
@@ -366,7 +366,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     draw.text((cx + cw - 60, cy + 22), "\U0001d54f", fill='#ffffff', font=fn_xl)
 
     sep_y = pfp_y + max(pfp_size, sz['display'] + sz['at'] + 16) + 10
-    draw.line([(cx + 20, sep_y), (cx + cw - 20, sep_y)], fill='#3d444d', width=1)
+    draw.line([(cx + 12, sep_y), (cx + cw - 12, sep_y)], fill='#3d444d', width=1)
 
     # Tweet text
     yt = sep_y + 22
@@ -378,16 +378,16 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # Timestamp
     yt += 18
-    draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
+    draw.line([(cx + 12, yt), (cx + cw - 12, yt)], fill='#3d444d', width=1)
     yt += 14
-    draw.text((cx + 24, yt), f"10:30 AM  \u00b7  {date_str}", fill='#8b949e', font=fn_time)
+    draw.text((cx + 14, yt), f"10:30 AM  \u00b7  {date_str}", fill='#8b949e', font=fn_time)
     views_text = "2,847 Views"
     vw = draw.textlength(views_text, font=fn_views)
-    draw.text((cx + cw - 32 - vw, yt + 1), views_text, fill='#8b949e', font=fn_views)
+    draw.text((cx + cw - 14 - vw, yt + 1), views_text, fill='#8b949e', font=fn_views)
 
     # Engagement
     yt += 44
-    draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
+    draw.line([(cx + 12, yt), (cx + cw - 12, yt)], fill='#3d444d', width=1)
     yt += 14
     # Draw engagement icons as simple shapes + text
     spacing = (cw - 48) // 5
@@ -400,7 +400,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     ]
     fn_icon = lf(False, 22)
     for i, (icon_type, count_txt, color) in enumerate(engage_data):
-        ix = cx + 24 + i * spacing
+        ix = cx + 14 + i * spacing
         iy = yt + 2
         if icon_type == "reply":
             # Speech bubble shape
