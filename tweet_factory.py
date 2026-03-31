@@ -849,7 +849,7 @@ with tab_card:
                 sug_idx_maker = 3
                 sug_name_maker = "Small"
             st.caption(f"💡 Recommended: {sug_name_maker} ({tlen} chars)")
-        card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=sug_idx_maker, horizontal=True, key="card_text_size")
+        card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=sug_idx_maker, horizontal=True, key=f"card_text_size_{sug_idx_maker}")
 
         if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
             if card_tweet_input:
