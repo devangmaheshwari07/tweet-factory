@@ -229,20 +229,80 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
             except: continue
         return ImageFont.load_default()
 
-    fn_top = lf(True, 44)
-    fn_top_sub = lf(False, 22)
-    fn_display = lf(True, 30)
-    fn_at = lf(False, 22)
-    fn_tweet = lf(False, 32)
-    fn_time = lf(False, 20)
-    fn_engage = lf(False, 20)
-    fn_hashtag = lf(True, 24)
-    fn_bt = lf(True, 36)
-    fn_bs = lf(False, 22)
-    fn_bd = lf(False, 20)
-    fn_xl = lf(True, 48)
-    fn_verified = lf(True, 14)
-    fn_views = lf(False, 18)
+    # Emoji font
+    def load_emoji_font(size):
+        emoji_paths = [
+            "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+            "/usr/share/fonts/truetype/noto/NotoEmoji-Regular.ttf",
+            "/usr/share/fonts/noto-color-emoji/NotoColorEmoji.ttf",
+            "/usr/share/fonts/truetype/ancient-scripts/Symbola_hint.ttf",
+        ]
+        for p in emoji_paths:
+            try:
+                return ImageFont.truetype(p, size)
+            except:
+                continue
+        return None
+
+    def has_emoji(text):
+        import re
+        emoji_pattern = re.compile(
+            "[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF"
+            "\U0001F1E0-\U0001F1FF\U00002702-\U000027B0\U0000FE00-\U0000FE0F"
+            "\U0001F900-\U0001F9FF\U0001FA00-\U0001FA6F\U0001FA70-\U0001FAFF"
+            "\U00002600-\U000026FF\U0000200D\U00002640\U00002642\U0000231A-\U0000231B"
+            "\U000023E9-\U000023F3\U000023F8-\U000023FA\U000025AA-\U000025AB"
+            "\U000025B6\U000025C0\U000025FB-\U000025FE\U00002934-\U00002935"
+            "\U00002B05-\U00002B07\U00002B1B-\U00002B1C\U00002B50\U00002B55"
+            "\U00003030\U0000303D\U00003297\U00003299\U0000FE0F]+", re.UNICODE)
+        return bool(emoji_pattern.search(text))
+
+    def draw_text_with_emoji(draw, xy, text, fill, font, emoji_font=None):
+        import re
+        if not emoji_font or not has_emoji(text):
+            draw.text(xy, text, fill=fill, font=font)
+            return
+        emoji_pattern = re.compile(
+            "([\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF"
+            "\U0001F1E0-\U0001F1FF\U00002702-\U000027B0\U0000FE00-\U0000FE0F"
+            "\U0001F900-\U0001F9FF\U0001FA00-\U0001FA6F\U0001FA70-\U0001FAFF"
+            "\U00002600-\U000026FF\U0000200D\U00002640\U00002642]+)", re.UNICODE)
+        x, y = xy
+        parts = emoji_pattern.split(text)
+        for part in parts:
+            if not part:
+                continue
+            if emoji_pattern.match(part):
+                try:
+                    draw.text((x, y), part, fill=fill, font=emoji_font, embedded_color=True)
+                except:
+                    try:
+                        draw.text((x, y), part, fill=fill, font=emoji_font)
+                    except:
+                        draw.text((x, y), part, fill=fill, font=font)
+                try:
+                    x += emoji_font.getlength(part)
+                except:
+                    x += font.getlength(part)
+            else:
+                draw.text((x, y), part, fill=fill, font=font)
+                x += font.getlength(part)
+
+    fn_emoji = load_emoji_font(36)
+    fn_top = lf(True, 50)
+    fn_top_sub = lf(False, 26)
+    fn_display = lf(True, 34)
+    fn_at = lf(False, 26)
+    fn_tweet = lf(False, 36)
+    fn_time = lf(False, 24)
+    fn_engage = lf(False, 24)
+    fn_hashtag = lf(True, 28)
+    fn_bt = lf(True, 40)
+    fn_bs = lf(False, 26)
+    fn_bd = lf(False, 24)
+    fn_xl = lf(True, 54)
+    fn_verified = lf(True, 16)
+    fn_views = lf(False, 22)
 
     # ── TOP HEADER: @equialpha centered ──
     ly = 45
@@ -260,7 +320,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     lines = []
     for para in tweet_text.split('\n'):
         if para.strip() == '': lines.append('')
-        else: lines.extend(tw.wrap(para, width=46))
+        else: lines.extend(tw.wrap(para, width=42))
 
     text_h = sum(20 if l == '' else 44 for l in lines)
     ch = max(500, 100 + text_h + 50 + 45 + 55 + 60 + 40)
@@ -303,7 +363,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     for line in lines:
         if yt > cy + ch - 140: break
         if line == '': yt += 20; continue
-        draw.text((cx + 24, yt), line, fill='#e6edf3', font=fn_tweet)
+        draw_text_with_emoji(draw, (cx + 24, yt), line, fill='#e6edf3', font=fn_tweet, emoji_font=fn_emoji)
         yt += 44
 
     # Timestamp
@@ -328,7 +388,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
         ("bookmark", "", '#8b949e'),
         ("share", "", '#8b949e'),
     ]
-    fn_icon = lf(False, 18)
+    fn_icon = lf(False, 22)
     for i, (icon_type, count_txt, color) in enumerate(engage_data):
         ix = cx + 24 + i * spacing
         iy = yt + 2
