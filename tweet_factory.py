@@ -123,7 +123,7 @@ The lesson part:
 
 Tone: Raw, real, conversational. Like telling a story at a chai stall.
 Format: Under 1000 characters. Short punchy lines. Emojis sparingly (only 🚀 for hype sarcasm).
-End with: #SwingTrading #PriceAction #SwingDNA #TechnicalAnalysis #FOMO #TradingPsychology #ChartStudy #NiftyTrader and the stock's ticker hashtag.""",
+End with: #SwingTrading #AIanalysis #SwingDNA #TechnicalAnalysis #FOMO #TradingPsychology #ChartStudy #NiftyTrader and the stock's ticker hashtag.""",
 
         """Research {stock_name} (NSE) and write a single tweet as a quiet, reflective observation about a trader you know who got stuck in this stock.
 
@@ -290,7 +290,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # Size presets: Large (phone-friendly), Medium, Small (more text)
     sizes = {
-        "Extra Large": {"top":62,"sub":34,"display":42,"at":30,"tweet":46,"time":28,"engage":28,"hash":36,"bt":48,"bs":30,"bd":28,"xl":62,"ver":20,"views":26,"emoji":46,"wrap":42,"line_h":58,"para_gap":32},
+        "Extra Large": {"top":62,"sub":34,"display":42,"at":30,"tweet":46,"time":28,"engage":28,"hash":36,"bt":48,"bs":30,"bd":28,"xl":62,"ver":20,"views":26,"emoji":46,"wrap":40,"line_h":58,"para_gap":32},
         "Large":  {"top":56,"sub":30,"display":38,"at":28,"tweet":40,"time":26,"engage":26,"hash":32,"bt":44,"bs":28,"bd":26,"xl":58,"ver":18,"views":24,"emoji":40,"wrap":46,"line_h":52,"para_gap":28},
         "Medium": {"top":50,"sub":26,"display":34,"at":24,"tweet":34,"time":22,"engage":22,"hash":28,"bt":40,"bs":24,"bd":22,"xl":52,"ver":16,"views":20,"emoji":34,"wrap":52,"line_h":44,"para_gap":22},
         "Small":  {"top":44,"sub":22,"display":30,"at":22,"tweet":28,"time":20,"engage":20,"hash":24,"bt":36,"bs":22,"bd":20,"xl":48,"ver":14,"views":18,"emoji":28,"wrap":60,"line_h":38,"para_gap":18},
@@ -334,7 +334,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     text_h = sum(sz["para_gap"] if l == '' else sz["line_h"] for l in lines)
     ch = max(500, 100 + text_h + 50 + 45 + 55 + 60 + 40)
-    ch = min(ch, 1350)
+    ch = min(ch, 1450)
 
     draw.rounded_rectangle([cx, cy, cx + cw, cy + ch], radius=24, fill='#161b22', outline='#30363d', width=2)
     draw.rounded_rectangle([cx + 2, cy + 2, cx + cw - 2, cy + 5], radius=0, fill='#1d9bf0')
@@ -428,7 +428,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # Hashtags
     ht_y = cy + ch + 28
-    hashtag_t = "#SwingTrading  #SwingDNA  #PriceAction"
+    hashtag_t = "#SwingTrading  #SwingDNA  #AIanalysis"
     htw2 = draw.textlength(hashtag_t, font=fn_hashtag)
     draw.text(((W - htw2) / 2, ht_y), hashtag_t, fill='#1d9bf0', font=fn_hashtag)
 
