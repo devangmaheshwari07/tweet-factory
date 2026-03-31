@@ -213,11 +213,8 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     img = PILImage.new('RGB', (W, H), '#0d1117')
     draw = ImageDraw.Draw(img)
 
-    for y in range(H):
-        r = int(13 + (y / H) * 15)
-        g = int(17 + (y / H) * 10)
-        b = int(23 + (y / H) * 20)
-        draw.line([(0, y), (W, y)], fill=(r, g, b))
+    # Solid dark blue background
+    draw.rectangle([0, 0, W, H], fill=(28, 27, 43))
 
     def lf(bold, size):
         paths_b = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
@@ -255,12 +252,12 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     draw.text(((W - sub_tw) / 2, ly + 50), sub_t, fill='#8b949e', font=fn_top_sub)
 
     # ── TWEET CARD ──
-    cx, cy, cw = 55, 185, W - 110
+    cx, cy, cw = 35, 185, W - 70
 
     lines = []
     for para in tweet_text.split('\n'):
         if para.strip() == '': lines.append('')
-        else: lines.extend(tw.wrap(para, width=40))
+        else: lines.extend(tw.wrap(para, width=46))
 
     text_h = sum(20 if l == '' else 44 for l in lines)
     ch = max(500, 100 + text_h + 50 + 45 + 55 + 60 + 40)
@@ -271,7 +268,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
 
     # Profile pic inside card
     pfp_size = 52
-    pfp_x, pfp_y = cx + 28, cy + 22
+    pfp_x, pfp_y = cx + 20, cy + 22
     if os.path.exists(logo_path):
         try:
             raw2 = PILImage.open(logo_path).convert("RGB")
@@ -296,33 +293,33 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     draw.text((cx + cw - 60, cy + 22), "\U0001d54f", fill='#ffffff', font=fn_xl)
 
     sep_y = pfp_y + pfp_size + 18
-    draw.line([(cx + 28, sep_y), (cx + cw - 28, sep_y)], fill='#21262d', width=1)
+    draw.line([(cx + 20, sep_y), (cx + cw - 20, sep_y)], fill='#3d444d', width=1)
 
     # Tweet text
     yt = sep_y + 18
     for line in lines:
         if yt > cy + ch - 140: break
         if line == '': yt += 20; continue
-        draw.text((cx + 32, yt), line, fill='#e6edf3', font=fn_tweet)
+        draw.text((cx + 24, yt), line, fill='#e6edf3', font=fn_tweet)
         yt += 44
 
     # Timestamp
     yt += 18
-    draw.line([(cx + 28, yt), (cx + cw - 28, yt)], fill='#21262d', width=1)
+    draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
     yt += 14
-    draw.text((cx + 32, yt), f"10:30 AM  \u00b7  {date_str}", fill='#8b949e', font=fn_time)
+    draw.text((cx + 24, yt), f"10:30 AM  \u00b7  {date_str}", fill='#8b949e', font=fn_time)
     views_text = "2,847 Views"
     vw = draw.textlength(views_text, font=fn_views)
     draw.text((cx + cw - 32 - vw, yt + 1), views_text, fill='#8b949e', font=fn_views)
 
     # Engagement
     yt += 38
-    draw.line([(cx + 28, yt), (cx + cw - 28, yt)], fill='#21262d', width=1)
+    draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
     yt += 14
     engage_items = [("\U0001f4ac", "12"), ("\U0001f501", "8"), ("\u2764\ufe0f", "96"), ("\U0001f516", ""), ("\u2b06\ufe0f", "")]
-    spacing = (cw - 60) // len(engage_items)
+    spacing = (cw - 48) // len(engage_items)
     for i, (icon, count_txt) in enumerate(engage_items):
-        ix = cx + 32 + i * spacing
+        ix = cx + 24 + i * spacing
         draw.text((ix, yt), icon, font=fn_engage)
         if count_txt:
             draw.text((ix + 26, yt + 2), count_txt, fill='#8b949e', font=fn_engage)
@@ -345,7 +342,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     for txt, yo, clr, f in [
         ("Swing DNA Course", 30, '#e6edf3', fn_bt),
         ("Build the DNA for Catching Explosive Moves", 75, '#b1bac4', fn_bs),
-        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 108, '#8b949e', fn_bd),
+        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 108, '#b1bac4', fn_bd),
     ]:
         tw2 = draw.textlength(txt, font=f)
         draw.text(((W - tw2) / 2, by + yo), txt, fill=clr, font=f)
