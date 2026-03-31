@@ -441,14 +441,19 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     draw.line([(200, by), (W - 200, by)], fill='#1d9bf0', width=1)
 
-    for txt, yo, clr, f in [
-        ("Swing DNA Course", 30, '#e6edf3', fn_bt),
-        ("Build the DNA for Catching Explosive Moves", 75, '#b1bac4', fn_bs),
-        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 108, '#b1bac4', fn_bd),
-    ]:
+    b_y = by + 25
+    b_items = [
+        ("Swing DNA Course", '#e6edf3', fn_bt),
+        ("Build the DNA for Catching Explosive Moves", '#b1bac4', fn_bs),
+        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", '#8b949e', fn_bd),
+    ]
+    for txt, clr, f in b_items:
         tw2 = draw.textlength(txt, font=f)
-        draw.text(((W - tw2) / 2, by + yo), txt, fill=clr, font=f)
-
+        draw.text(((W - tw2) / 2, b_y), txt, fill=clr, font=f)
+        try:
+            b_y += int(f.size * 1.6)
+        except:
+            b_y += 40
     draw.line([(W // 2 - 50, b_y + 10), (W // 2 + 50, b_y + 10)], fill='#1d9bf0', width=2)
 
     buf = io.BytesIO()
