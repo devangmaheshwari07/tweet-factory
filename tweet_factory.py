@@ -203,9 +203,43 @@ def get_all_tweets_from_calendar(cal):
             all_tweets.append({**entry, "date": date_str})
     return all_tweets
 
+
+# --- Thread Builder ---
+def split_into_thread(text, max_chars=280):
+    words = text.split()
+    tweets = []
+    current = ""
+    for word in words:
+        test = f"{current} {word}".strip()
+        if len(test) <= max_chars - 10:  # reserve space for (1/X)
+            current = test
+        else:
+            tweets.append(current)
+            current = word
+    if current:
+        tweets.append(current)
+    total = len(tweets)
+    return [f"{t} ({i+1}/{total})" for i, t in enumerate(tweets)]
+
+# --- Streak Calculator ---
+def calculate_streak(cal):
+    today = datetime.date.today()
+    streak = 0
+    check_date = today
+    while True:
+        ds = str(check_date)
+        if ds in cal:
+            entries = cal[ds]
+            if any(e.get("status") == "Posted" for e in entries):
+                streak += 1
+                check_date -= datetime.timedelta(days=1)
+                continue
+        break
+    return streak
+
 # ============ UI ============
 st.title("🐦 Tweet Factory")
-tab_generate, tab_calendar, tab_archive = st.tabs(["✍️ Generate", "📅 Content Calendar", "📝 All Tweets"])
+tab_generate, tab_calendar, tab_thread, tab_archive = st.tabs(["✍️ Generate", "📅 Content Calendar", "🧵 Thread Builder", "📝 All Tweets"])
 
 # ============ TAB 1: GENERATE ============
 with tab_generate:
@@ -332,11 +366,20 @@ Tone: {tone}
 
                 if ds in cal:
                     entries = cal[ds]
+                    CATEGORY_DOT = {
+                        "📈 Storytelling & 10 EMA Importance": "🟠",
+                        "🎓 Educational / Teaching": "🔵",
+                        "💡 Trading Tips & Mindset": "🟢",
+                        "🔥 Engagement / Viral": "🔴",
+                        "🛠️ Tool / Dashboard Promo": "🟣",
+                        "📊 Chart / Setup Sharing": "🟡",
+                    }
                     cat_tags = []
                     for e in entries:
                         short = CATEGORY_SHORT.get(e["category"], e["category"])
+                        dot = CATEGORY_DOT.get(e["category"], "⚪")
                         tag = "(P)" if e.get("status") == "Posted" else "(S)"
-                        cat_tags.append(f"{short} {tag}")
+                        cat_tags.append(f"{dot} {short} {tag}")
                     cats_str = ", ".join(cat_tags)
                     st.markdown(f"**{day_label}** — {cats_str}")
                 else:
@@ -459,7 +502,7 @@ with tab_calendar:
                     st.markdown(f"**Tweet {ei+1}** — {short} [{status}]")
                     st.text_area("", entry["tweet"], height=100, key=f"cal_{date_str}_{ei}", disabled=True)
 
-                    b1, b2, b3 = st.columns(3)
+                    b1, b2, b3, b4 = st.columns(4)
                     with b1:
                         if st.button("📋 Copy", key=f"copy_{date_str}_{ei}"):
                             st.code(entry["tweet"])
@@ -471,6 +514,13 @@ with tab_calendar:
                                 st.session_state.calendar = load_calendar()
                                 st.rerun()
                     with b3:
+                        dup_date = st.date_input("Dup to", value=datetime.date.today(), key=f"dupdate_{date_str}_{ei}", label_visibility="collapsed")
+                        if st.button("📄 Duplicate", key=f"dup_{date_str}_{ei}"):
+                            save_calendar_entry(str(dup_date), entry["tweet"], entry["category"])
+                            st.session_state.calendar = load_calendar()
+                            st.success(f"Duplicated to {dup_date}")
+                            st.rerun()
+                    with b4:
                         if st.button("🗑️ Remove", key=f"caldel_{date_str}_{ei}"):
                             delete_calendar_entry(date_str, ei)
                             st.session_state.calendar = load_calendar()
@@ -478,7 +528,37 @@ with tab_calendar:
             else:
                 st.warning("No posts scheduled. Go to Generate tab to create one.")
 
-# ============ TAB 3: ALL TWEETS (ARCHIVE) ============
+
+# ============ TAB 3: THREAD BUILDER ============
+with tab_thread:
+    st.subheader("🧵 Thread Builder")
+    st.caption("Paste a long tweet and split it into a numbered thread.")
+
+    thread_input = st.text_area("Paste your long-form content here", height=200, key="thread_input")
+    max_chars = st.slider("Max characters per tweet", 200, 280, 270, step=10)
+
+    if thread_input:
+        thread_parts = split_into_thread(thread_input, max_chars)
+        st.markdown(f"**Split into {len(thread_parts)} tweets:**")
+
+        for idx, part in enumerate(thread_parts):
+            char_count = len(part)
+            color = "green" if char_count <= 280 else "red"
+            st.text_area(f"Tweet {idx+1}", part, height=80, key=f"thread_part_{idx}", disabled=True)
+            st.caption(f"{char_count}/280 chars")
+
+        st.markdown("---")
+        # Save thread to calendar
+        save_cat_thread = st.selectbox("Save as category", ALL_CATEGORIES, key="thread_save_cat")
+        thread_date = st.date_input("Schedule for", value=datetime.date.today(), key="thread_date")
+        if st.button("📅 Save Thread to Calendar", use_container_width=True):
+            for part in thread_parts:
+                save_calendar_entry(str(thread_date), part, save_cat_thread)
+            st.session_state.calendar = load_calendar()
+            st.success(f"✅ Saved {len(thread_parts)} tweets to {thread_date}!")
+
+
+# ============ TAB 4: ALL TWEETS (ARCHIVE) ============
 with tab_archive:
     st.subheader("📝 All Tweets")
     st.caption("Every tweet saved to the calendar — your complete archive.")
@@ -525,6 +605,13 @@ with st.sidebar:
     total = len(all_tweets)
     posted = len([t for t in all_tweets if t.get("status") == "Posted"])
     scheduled = total - posted
+
+    # Streak
+    streak = calculate_streak(cal)
+    if streak > 0:
+        st.success(f"🔥 {streak} day streak!")
+    else:
+        st.caption("🔥 No streak yet — post today to start!")
 
     st.metric("Total Tweets", total)
     c1, c2 = st.columns(2)
