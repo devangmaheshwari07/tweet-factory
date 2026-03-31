@@ -370,15 +370,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
 
     draw.line([(W // 2 - 60, by + 160), (W // 2 + 60, by + 160)], fill='#1d9bf0', width=2)
 
-    # DEBUG: Show font info on card (remove later)
-    try:
-        vf = lf(False, 14)
-        font_path_used = get_font_path(False) or "DEFAULT"
-        font_path_bold = get_font_path(True) or "DEFAULT"
-        debug_txt = f"v8.2 | R:{font_path_used} | B:{font_path_bold}"
-        draw.text((30, H - 25), debug_txt, fill='#ff4444', font=vf)
-    except Exception as e:
-        draw.text((30, H - 25), f"v8.2 ERR: {str(e)[:60]}", fill='#ff4444')
+
 
     buf = io.BytesIO()
     img.save(buf, format="PNG", quality=95)
