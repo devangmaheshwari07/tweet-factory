@@ -772,7 +772,10 @@ with tab_calendar:
                                 st.session_state.calendar = load_calendar()
                                 st.rerun()
                     with b3:
-                        cal_text_size = st.selectbox("Size", ["Extra Large", "Large", "Medium", "Small"], index=1, key=f"cardsize_{date_str}_{ei}", label_visibility="collapsed")
+                        _tl = len(entry["tweet"])
+                        _si = 0 if _tl <= 200 else (1 if _tl <= 400 else (2 if _tl <= 700 else 3))
+                        _sn = ["Extra Large", "Large", "Medium", "Small"][_si]
+                        cal_text_size = st.selectbox(f"💡{_sn}", ["Extra Large", "Large", "Medium", "Small"], index=_si, key=f"cardsize_{date_str}_{ei}")
                         if st.button("📸 Card", key=f"card_{date_str}_{ei}"):
                             card_buf = generate_tweet_card(entry["tweet"], entry["category"], date_str, text_size=cal_text_size)
                             st.session_state[f"card_img_{date_str}_{ei}"] = card_buf
