@@ -270,13 +270,13 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
                 pass
         return ImageFont.load_default()
 
-    fn = lf(True, 38)
+    fn = lf(True, 42)
     fhl = lf(False, 22)
     fh = lf(True, 24)
-    ft = lf(False, 30)
-    fht = lf(False, 24)
+    ft = lf(False, 32)
+    fht = lf(True, 24)
     fd = lf(False, 20)
-    fch = lf(True, 26)
+    fch = lf(True, 28)
     fbt = lf(True, 36)
     fbs = lf(False, 22)
     fbd = lf(False, 18)
@@ -333,7 +333,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
 
     draw.text((cx + 35, cy + 25), "\U0001d54f", fill='#1d9bf0', font=fch)
     draw.text((cx + 70, cy + 27), "@equialpha", fill='#8b949e', font=fch)
-    draw.text((cx + cw - 200, cy + 30), date_str, fill='#484f58', font=fd)
+    draw.text((cx + cw - 200, cy + 30), date_str, fill='#8b949e', font=fd)
     draw.line([(cx + 35, cy + 70), (cx + cw - 35, cy + 70)], fill='#21262d', width=1)
 
     yt = cy + 95
@@ -362,8 +362,8 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
 
     for txt, yo, clr, f in [
         ("Swing DNA Course", 30, '#e6edf3', fbt),
-        ("Build the DNA for Catching Explosive Moves", 80, '#8b949e', fbs),
-        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 115, '#484f58', fbd),
+        ("Build the DNA for Catching Explosive Moves", 80, '#b1bac4', fbs),
+        ("AI Powered Analysis  \u00b7  Research Logs  \u00b7  Charts  \u00b7  Discipline", 115, '#8b949e', fbd),
     ]:
         tw2 = draw.textlength(txt, font=f)
         draw.text(((W - tw2) / 2, by + yo), txt, fill=clr, font=f)
@@ -373,7 +373,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
 
 
     buf = io.BytesIO()
-    img.save(buf, format="PNG", quality=95)
+    img.save(buf, format="PNG", optimize=False)
     buf.seek(0)
     return buf
 
