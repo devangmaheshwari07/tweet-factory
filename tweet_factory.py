@@ -5,7 +5,7 @@ import json
 import os
 from collections import Counter
 
-st.set_page_config(page_title="Tweet Factory 🐦", layout="wide")
+st.set_page_config(page_title="Tweet Factory 🐦", page_icon="🐦", layout="wide")
 
 # --- Persistent Storage ---
 CALENDAR_FILE = "content_calendar.json"
