@@ -290,10 +290,10 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
 
     # Size presets: Large (phone-friendly), Medium, Small (more text)
     sizes = {
-        "Extra Large": {"top":62,"sub":34,"display":42,"at":30,"tweet":46,"time":28,"engage":28,"hash":36,"bt":48,"bs":30,"bd":28,"xl":62,"ver":20,"views":26,"emoji":46,"wrap":44,"line_h":58,"para_gap":32},
-        "Large":  {"top":56,"sub":30,"display":38,"at":28,"tweet":40,"time":26,"engage":26,"hash":32,"bt":44,"bs":28,"bd":26,"xl":58,"ver":18,"views":24,"emoji":40,"wrap":48,"line_h":52,"para_gap":28},
-        "Medium": {"top":50,"sub":26,"display":34,"at":24,"tweet":34,"time":22,"engage":22,"hash":28,"bt":40,"bs":24,"bd":22,"xl":52,"ver":16,"views":20,"emoji":34,"wrap":54,"line_h":44,"para_gap":22},
-        "Small":  {"top":44,"sub":22,"display":30,"at":22,"tweet":28,"time":20,"engage":20,"hash":24,"bt":36,"bs":22,"bd":20,"xl":48,"ver":14,"views":18,"emoji":28,"wrap":62,"line_h":38,"para_gap":18},
+        "Extra Large": {"top":62,"sub":34,"display":42,"at":30,"tweet":46,"time":28,"engage":28,"hash":36,"bt":48,"bs":30,"bd":28,"xl":62,"ver":20,"views":26,"emoji":46,"wrap":42,"line_h":58,"para_gap":32},
+        "Large":  {"top":56,"sub":30,"display":38,"at":28,"tweet":40,"time":26,"engage":26,"hash":32,"bt":44,"bs":28,"bd":26,"xl":58,"ver":18,"views":24,"emoji":40,"wrap":46,"line_h":52,"para_gap":28},
+        "Medium": {"top":50,"sub":26,"display":34,"at":24,"tweet":34,"time":22,"engage":22,"hash":28,"bt":40,"bs":24,"bd":22,"xl":52,"ver":16,"views":20,"emoji":34,"wrap":52,"line_h":44,"para_gap":22},
+        "Small":  {"top":44,"sub":22,"display":30,"at":22,"tweet":28,"time":20,"engage":20,"hash":24,"bt":36,"bs":22,"bd":20,"xl":48,"ver":14,"views":18,"emoji":28,"wrap":60,"line_h":38,"para_gap":18},
     }
     sz = sizes.get(text_size, sizes["Large"])
 
@@ -819,6 +819,18 @@ with tab_card:
 
         card_date = st.date_input("Date on card", value=datetime.date.today(), key="card_maker_date")
 
+        # Suggest text size based on content length
+        if card_tweet_input:
+            tlen = len(card_tweet_input)
+            if tlen <= 200:
+                suggested = "Extra Large"
+            elif tlen <= 400:
+                suggested = "Large"
+            elif tlen <= 700:
+                suggested = "Medium"
+            else:
+                suggested = "Small"
+            st.info(f"💡 Suggested size: **{suggested}** ({tlen} chars)")
         card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=1, horizontal=True, key="card_text_size")
 
         if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
