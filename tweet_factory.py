@@ -435,16 +435,22 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     # Follow line above branding
     follow_t = "Follow @equialpha"
     follow_tw = draw.textlength(follow_t, font=fn_bt)
-    x_logo_t = " 𝕏"
+    x_logo_t = " 𝕏 "
     x_tw = draw.textlength(x_logo_t, font=fn_bt)
-    total_fw = follow_tw + x_tw
+    count_t = "(100K+)"
+    count_tw = draw.textlength(count_t, font=fn_bs)
+    total_fw = follow_tw + x_tw + count_tw
     fx = (W - total_fw) / 2
-    draw.text((fx, by - sz['bt'] - 15), follow_t, fill='#e6edf3', font=fn_bt)
-    draw.text((fx + follow_tw, by - sz['bt'] - 15), x_logo_t, fill='#1d9bf0', font=fn_bt)
+    follow_y = by - sz['bt'] - 12
+    draw.text((fx, follow_y), follow_t, fill='#e6edf3', font=fn_bt)
+    draw.text((fx + follow_tw, follow_y), x_logo_t, fill='#1d9bf0', font=fn_bt)
+    draw.text((fx + follow_tw + x_tw, follow_y + (sz['bt'] - sz['bs']) // 2), count_t, fill='#8b949e', font=fn_bs)
 
-    draw.line([(200, by), (W - 200, by)], fill='#1d9bf0', width=1)
+    # Line centered between Follow and Swing DNA Course
+    line_y = by + 0
+    draw.line([(200, line_y), (W - 200, line_y)], fill='#1d9bf0', width=1)
 
-    b_y = by + 25
+    b_y = by + 12
     b_items = [
         ("Swing DNA Course", '#e6edf3', fn_bt),
         ("Build the DNA for Catching Explosive Moves", '#b1bac4', fn_bs),
