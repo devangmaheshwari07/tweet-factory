@@ -319,13 +319,42 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     yt += 38
     draw.line([(cx + 20, yt), (cx + cw - 20, yt)], fill='#3d444d', width=1)
     yt += 14
-    engage_items = [("\U0001f4ac", "12"), ("\U0001f501", "8"), ("\u2764\ufe0f", "96"), ("\U0001f516", ""), ("\u2b06\ufe0f", "")]
-    spacing = (cw - 48) // len(engage_items)
-    for i, (icon, count_txt) in enumerate(engage_items):
+    # Draw engagement icons as simple shapes + text
+    spacing = (cw - 48) // 5
+    engage_data = [
+        ("reply", "12", '#8b949e'),
+        ("retweet", "8", '#8b949e'),
+        ("like", "96", '#f91880'),
+        ("bookmark", "", '#8b949e'),
+        ("share", "", '#8b949e'),
+    ]
+    fn_icon = lf(False, 18)
+    for i, (icon_type, count_txt, color) in enumerate(engage_data):
         ix = cx + 24 + i * spacing
-        draw.text((ix, yt), icon, font=fn_engage)
+        iy = yt + 2
+        if icon_type == "reply":
+            # Speech bubble shape
+            draw.arc([ix, iy, ix+18, iy+16], 0, 360, fill='#8b949e', width=2)
+            draw.line([(ix+4, iy+14), (ix, iy+20)], fill='#8b949e', width=2)
+        elif icon_type == "retweet":
+            # Two arrows
+            draw.line([(ix, iy+10), (ix+18, iy+10)], fill='#8b949e', width=2)
+            draw.line([(ix+14, iy+6), (ix+18, iy+10), (ix+14, iy+14)], fill='#8b949e', width=2)
+            draw.line([(ix, iy+6), (ix+18, iy+6)], fill='#8b949e', width=2)
+            draw.line([(ix+4, iy+2), (ix, iy+6), (ix+4, iy+10)], fill='#8b949e', width=2)
+        elif icon_type == "like":
+            # Heart shape
+            draw.polygon([(ix+9, iy+18), (ix, iy+8), (ix+2, iy+3), (ix+6, iy+2), (ix+9, iy+6),
+                          (ix+12, iy+2), (ix+16, iy+3), (ix+18, iy+8)], fill='#f91880')
+        elif icon_type == "bookmark":
+            # Bookmark shape
+            draw.polygon([(ix+3, iy), (ix+15, iy), (ix+15, iy+18), (ix+9, iy+13), (ix+3, iy+18)], outline='#8b949e', width=2)
+        elif icon_type == "share":
+            # Upload arrow
+            draw.line([(ix+9, iy+2), (ix+9, iy+16)], fill='#8b949e', width=2)
+            draw.line([(ix+4, iy+7), (ix+9, iy+2), (ix+14, iy+7)], fill='#8b949e', width=2)
         if count_txt:
-            draw.text((ix + 26, yt + 2), count_txt, fill='#8b949e', font=fn_engage)
+            draw.text((ix + 24, yt + 2), count_txt, fill=color, font=fn_engage)
 
     # Hashtags
     ht_y = cy + ch + 28
