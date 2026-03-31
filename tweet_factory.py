@@ -538,8 +538,8 @@ with st.sidebar:
     next_7 = [str(today + datetime.timedelta(days=i)) for i in range(7)]
     upcoming_days = sum(1 for d in next_7 if d in cal)
     upcoming_tweets = sum(len(cal.get(d, [])) for d in next_7)
-    st.caption("Next 7 Days", f"{upcoming_days}/7 days covered")
-    st.caption("Tweets Lined Up", upcoming_tweets)
+    st.caption(f"Next 7 Days: **{upcoming_days}/7** days covered")
+    st.caption(f"Tweets Lined Up: **{upcoming_tweets}**")
     if upcoming_days < 7:
         st.warning(f"⚠️ {7 - upcoming_days} days need content!")
     else:
