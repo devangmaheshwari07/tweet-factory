@@ -314,7 +314,12 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png"):
     htw2 = draw.textlength(hashtag_t, font=fht)
     draw.text(((W - htw2) / 2, cy + ch + 25), hashtag_t, fill='#1d9bf0', font=fht)
 
-    by = H - 280
+    # Position branding: centered between hashtags end and image bottom
+    content_end = cy + ch + 65
+    available = H - content_end
+    by = content_end + (available - 200) // 2
+    by = max(by, content_end + 40)
+    by = min(by, H - 220)
     draw.line([(150, by), (W - 150, by)], fill='#1d9bf0', width=1)
 
     for txt, yo, clr, f in [
