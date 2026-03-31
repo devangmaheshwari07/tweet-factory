@@ -288,9 +288,9 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
                 draw.text((x, y), part, fill=fill, font=font)
                 x += font.getlength(part)
 
-    fn_emoji = load_emoji_font(sz["emoji"])
     # Size presets: Large (phone-friendly), Medium, Small (more text)
     sizes = {
+        "Extra Large": {"top":62,"sub":34,"display":42,"at":30,"tweet":46,"time":28,"engage":28,"hash":36,"bt":48,"bs":30,"bd":28,"xl":62,"ver":20,"views":26,"emoji":46,"wrap":34,"line_h":58,"para_gap":32},
         "Large":  {"top":56,"sub":30,"display":38,"at":28,"tweet":40,"time":26,"engage":26,"hash":32,"bt":44,"bs":28,"bd":26,"xl":58,"ver":18,"views":24,"emoji":40,"wrap":38,"line_h":52,"para_gap":28},
         "Medium": {"top":50,"sub":26,"display":34,"at":24,"tweet":34,"time":22,"engage":22,"hash":28,"bt":40,"bs":24,"bd":22,"xl":52,"ver":16,"views":20,"emoji":34,"wrap":42,"line_h":44,"para_gap":22},
         "Small":  {"top":44,"sub":22,"display":30,"at":22,"tweet":28,"time":20,"engage":20,"hash":24,"bt":36,"bs":22,"bd":20,"xl":48,"ver":14,"views":18,"emoji":28,"wrap":48,"line_h":38,"para_gap":18},
@@ -311,6 +311,7 @@ def generate_tweet_card(tweet_text, category, date_str, logo_path="logo-2.png", 
     fn_xl = lf(True, sz["xl"])
     fn_verified = lf(True, sz["ver"])
     fn_views = lf(False, sz["views"])
+    fn_emoji = load_emoji_font(sz["emoji"])
 
     # ── TOP HEADER: @equialpha centered ──
     ly = 40
@@ -765,7 +766,7 @@ with tab_calendar:
                                 st.session_state.calendar = load_calendar()
                                 st.rerun()
                     with b3:
-                        cal_text_size = st.selectbox("Size", ["Large", "Medium", "Small"], index=0, key=f"cardsize_{date_str}_{ei}", label_visibility="collapsed")
+                        cal_text_size = st.selectbox("Size", ["Extra Large", "Large", "Medium", "Small"], index=1, key=f"cardsize_{date_str}_{ei}", label_visibility="collapsed")
                         if st.button("📸 Card", key=f"card_{date_str}_{ei}"):
                             card_buf = generate_tweet_card(entry["tweet"], entry["category"], date_str, text_size=cal_text_size)
                             st.session_state[f"card_img_{date_str}_{ei}"] = card_buf
@@ -812,7 +813,7 @@ with tab_card:
 
         card_date = st.date_input("Date on card", value=datetime.date.today(), key="card_maker_date")
 
-        card_text_size = st.radio("Text Size", ["Large", "Medium", "Small"], index=0, horizontal=True, key="card_text_size")
+        card_text_size = st.radio("Text Size", ["Extra Large", "Large", "Medium", "Small"], index=1, horizontal=True, key="card_text_size")
 
         if st.button("📸 Generate Card", use_container_width=True, key="card_maker_btn"):
             if card_tweet_input:
