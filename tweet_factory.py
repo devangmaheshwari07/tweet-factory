@@ -773,7 +773,7 @@ with tab_calendar:
                                 st.rerun()
                     with b3:
                         _tl = len(entry["tweet"])
-                        _si = 0 if _tl <= 200 else (1 if _tl <= 400 else (2 if _tl <= 700 else 3))
+                        _si = 0 if _tl < 350 else (1 if _tl <= 620 else (2 if _tl <= 800 else 3))
                         _sn = ["Extra Large", "Large", "Medium", "Small"][_si]
                         cal_text_size = st.selectbox(f"💡{_sn}", ["Extra Large", "Large", "Medium", "Small"], index=_si, key=f"cardsize_{date_str}_{ei}")
                         if st.button("📸 Card", key=f"card_{date_str}_{ei}"):
@@ -827,13 +827,13 @@ with tab_card:
         sug_name_maker = "Large"
         if card_tweet_input:
             tlen = len(card_tweet_input)
-            if tlen <= 200:
+            if tlen < 350:
                 sug_idx_maker = 0
                 sug_name_maker = "Extra Large"
-            elif tlen <= 400:
+            elif tlen <= 620:
                 sug_idx_maker = 1
                 sug_name_maker = "Large"
-            elif tlen <= 700:
+            elif tlen <= 800:
                 sug_idx_maker = 2
                 sug_name_maker = "Medium"
             else:
